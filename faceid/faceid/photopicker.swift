@@ -4,7 +4,7 @@
 //
 //  Created by Daniel Herbert on 19/05/2025.
 //
-
+//test
 import SwiftUI
 import PhotosUI
 import UIKit
@@ -332,7 +332,7 @@ struct photopicker: View {
                 // Set a sensible threshold; tune with your data.
                 // For ArcFace-like exports, 0.5–0.6 is common for same-person after proper alignment.
                 
-                let threshold: Float = 0.10
+                let threshold: Float = 0.50
                 print("threshold: ",sim)
                 let isMatch = sim >= threshold
                 
