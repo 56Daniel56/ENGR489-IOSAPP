@@ -1,0 +1,7 @@
+Button("Take face with camera") {
+    isShowingCamera2 = true
+}
+.buttonStyle(.borderedProminent) // <- Apply it here
+.sheet(isPresented: $isShowingCamera2) {
+    CameraView(image: $viewModel2.secondImage)
+}

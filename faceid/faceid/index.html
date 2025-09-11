@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test Page</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <h1>Hello from your local server!</h1>
+  <p>
+    <a href="myapp://verify?sessionId=abc123&callback=http://10.141.167.159:8000">Click here to launch the app with token</a>
+    
+    
+    <button onclick="fetchData()">Get Message</button>
+    
+    
+    <form id="hashForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name"><br><br>
+
+        <label for="dob">Birthday (dd-MM-yyyy):</label>
+        <input type="text" id="dob"><br><br>
+
+        <button type="submit">Generate Hashes</button>
+    </form>
+
+    <h3>Output:</h3>
+    <p><strong>Name Hash:</strong></p>
+    <pre id="nameHash">Not generated yet.</pre>
+
+    <p><strong>DOB Hash:</strong></p>
+    <pre id="dobHash">Not generated yet.</pre>
+
+    <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+    <div id="qrcode"></div>
+    <script>
+    
+        function isIphone() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+    // Check for iPhone explicitly in userAgent
+    if (/iPhone/.test(ua)) return true;
+
+    // Some browsers expose platform info in navigator.userAgentData
+    if (navigator.userAgentData && navigator.userAgentData.platform) {
+        return navigator.userAgentData.platform === 'iOS';
+    }
+
+    return false;
+}
+        
+        if(!isIphone()){
+            alert("Not Using an Iphone");
+            document.getElementById('result').textContent = "You are not using an iPhone. Here's a QR code to scan via Iphone";
+        
+            new QRCode(document.getElementById("qrcode"), {
+                text: "myapp://verify?sessionId=abc123&callback=http://localhost:8000",  // Replace with your desired URL
+                width: 200,
+                height: 200
+            });
+        }
+    
+       async function generateHash(input) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input);
+            console.log(Array.from(data));
+
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        document.getElementById('hashForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value.trim().toLowerCase();
+            const dob = document.getElementById('dob').value.trim();
+
+            if (!name || !dob) {
+                document.getElementById('nameHash').textContent = "Please enter both fields.";
+                document.getElementById('dobHash').textContent = "";
+                return;
+            }
+
+            const nameHash = await generateHash(name);
+            const dobHash = await generateHash(dob);
+
+            document.getElementById('nameHash').textContent = nameHash;
+            document.getElementById('dobHash').textContent = dobHash;
+        });
+        function fetchData() {
+            const params = new URLSearchParams({ id: 'abc123'});
+            fetch(`http://localhost:5050/verify?${params.toString()}`)
+            .then(response => response.text())
+            .then(data => {
+            document.getElementById('result').innerText = data;
+        })
+        .catch(error => {
+          document.getElementById('result').innerText = "Error: " + error;
+        });
+        }
+    </script>
+    
+  </p>
+</body>
+</html>
